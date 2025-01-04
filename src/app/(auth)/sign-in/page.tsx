@@ -113,14 +113,14 @@ function SignInForm() {
             </Button>
           </form>
         </Form>
-        <div className="text-center mt-4">
+        {/* <div className="text-center mt-4">
           <p className="text-sm text-gray-500">
             Don&apos;t have an account? &nbsp;
             <Link href="/sign-up" className="text-indigo-500 hover:text-indigo-700 font-medium">
               Sign up now
             </Link>
           </p>
-        </div>
+        </div> */}
       </div>
     </div>
   );
