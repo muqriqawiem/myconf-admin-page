@@ -1,56 +1,83 @@
-import mongoose,{Schema,Document} from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
-export interface IUser extends Document{
-    fullname:string;
-    email:string;
-    password:string;
-    verifyCode:string | undefined;
-    verifyCodeExpiry:Date | undefined;
-    isVerified:boolean;
-    affilation:string,
-    country:string,
-    contactNumber:number,
+export interface User extends Document {
+    fullname: string;
+    email: string;
+    password: string;
+    verifyCode: string | undefined;
+    verifyCodeExpiry: Date | undefined;
+    forgotPasswordToken: string | undefined,
+    forgotPasswordTokenExpiry: Date | undefined, // Token expires in 1 hour
+    isVerified: boolean;
+    affilation: string,
+    country: string,
+    contactNumber: number,
+    isReviewer: boolean
+    // Organizedconferences:mongoose.Types.ObjectId[],
+    // submittedPapers:mongoose.Types.ObjectId[]
 }
 
-const UserSchema:Schema<IUser> = new Schema({
-    fullname:{
-        type:String,
-        required:[true,"Full Name is required"],
+const UserSchema: Schema<User> = new Schema({
+    fullname: {
+        type: String,
+        required: [true, "Full Name is required"],
     },
-    email:{
-        type:String,
-        required:[true,"Email is required"],
-        unique:true,
-        match:[/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,"please use a valid email address"]
+    email: {
+        type: String,
+        required: [true, "Email is required"],
+        unique: true,
+        match: [/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, "please use a valid email address"]
     },
-    password:{
-        type:String,
-        required:[true,"password is required"]
+    password: {
+        type: String,
+        required: [true, "password is required"]
     },
-    verifyCode:{
-        type:String,
+    verifyCode: {
+        type: String,
     },
-    verifyCodeExpiry:{
-        type:Date,
+    verifyCodeExpiry: {
+        type: Date,
     },
-    isVerified:{
-        type:Boolean,
-        default:false
+    isVerified: {
+        type: Boolean,
+        default: false
     },
-    affilation:{
-        type:String,
-        required:true
+    forgotPasswordTokenExpiry: {
+        type: Date,
     },
-    country:{
-        type:String,
-        required:true,
-        default:"India"
+    forgotPasswordToken: {
+        type: String,
+        default: false
     },
-    contactNumber:{
-        type:Number,
-        required:true,
+    affilation: {
+        type: String,
+        required: true
+    },
+    country: {
+        type: String,
+        required: true,
+        default: "India"
+    },
+    contactNumber: {
+        type: Number,
+        required: true,
+    },
+    isReviewer: {
+        type: Boolean,
+        default: true
     }
-},{timestamps:true})
+    // Organizedconferences:[{
+    //     type:mongoose.Schema.Types.ObjectId,
+    //     ref:"Conference"
+    // }],
+    // submittedPapers:[
+    //     {
+    //     type: Schema.Types.ObjectId, 
+    //     ref: 'Paper'
+    //     }
+    // ]
+}, { timestamps: true })
 
-const UserModel=(mongoose.models.User as mongoose.Model<IUser>) || (mongoose.model<IUser>("User",UserSchema))
+const UserModel = (mongoose.models.User as mongoose.Model<User>) || (mongoose.model<User>("User", UserSchema))
+
 export default UserModel

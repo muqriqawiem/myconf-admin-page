@@ -67,7 +67,7 @@ function Navbar() {
           </motion.div>
 
           <Link href="/" className="text-xl font-bold">
-            <Image src={"/AdroidCMTLogo.png"} alt={"Adroid CMS"} width={150} height={100} />
+            <Image src={"/AdroidCMTLogo.png"} alt={"MYCONF"} width={150} height={100} />
           </Link>
         </div>
 
@@ -111,12 +111,12 @@ function Navbar() {
               <Link href="/users" className="hover:font-bold" onClick={() => setOpen(false)}>
                 Users
               </Link>
-              <Link href="/smart-sub" className="hover:font-bold" onClick={() => setOpen(false)}>
+              {/* <Link href="/smart-sub" className="hover:font-bold" onClick={() => setOpen(false)}>
                 SmartSub
-              </Link>
-              <Link href="/pricing" className="hover:font-bold" onClick={() => setOpen(false)}>
+              </Link> */}
+              {/* <Link href="/pricing" className="hover:font-bold" onClick={() => setOpen(false)}>
                 Pricing
-              </Link>
+              </Link> */}
             </motion.div>
           </motion.div>
         )}
@@ -125,7 +125,7 @@ function Navbar() {
       {/* Desktop Navigation */}
       <div className="hidden container mx-auto lg:flex flex-col md:flex-row justify-between items-center">
         <Link href="/" className="text-xl font-bold">
-          <Image src={"/AdroidCMTLogo.png"} alt={"Adroid CMS"} width={150} height={100} />
+          <Image src={"/AdroidCMTLogo.png"} alt={"MYCONF"} width={150} height={100} />
         </Link>
         <div className="flex flex-col lg:flex-row gap-6 text-center">
           <Link href="/conferences" className="hover:font-bold" onClick={() => setOpen(false)}>

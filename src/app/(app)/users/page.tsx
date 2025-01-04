@@ -1,15 +1,17 @@
 "use client"
 import Loader from '@/components/Loader'
 import { useGetAllUsersQuery } from '@/store/features/UserData'
-import React from 'react'
+import React, { useCallback } from 'react'
 import { ColumnDef } from "@tanstack/react-table"
 import { DataTable } from '../../../components/DataTable'
 import { Button } from '@/components/ui/button'
 import { ArrowUpDown } from 'lucide-react'
 import { Checkbox } from "@/components/ui/checkbox"
-import { IUser } from '@/model/User'
+import { User } from '@/model/User'
+import Papa from 'papaparse'
+import { useDeleteUsersMutation } from '@/store/features/UserData';
 
-const columns: ColumnDef<IUser>[] = [
+const columns: ColumnDef<User>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -70,20 +72,78 @@ const columns: ColumnDef<IUser>[] = [
 
 const Page = () => {
 
-  
-    const { data: AllUsers, error: UserError, isLoading: loadingUsers } = useGetAllUsersQuery()
 
-    if(loadingUsers){
-      return <Loader/>
+  const { data: AllUsers, error: UserError, isLoading: loadingUsers } = useGetAllUsersQuery();
+
+  const [deleteUsers] = useDeleteUsersMutation();
+
+  const handleDeleteUsers = async (selectedRows: User[]) => {
+    try {
+      //extract ids of selected users
+      const selectedIds = selectedRows.map(row => row._id);
+
+      //call the delete mutation
+      await deleteUsers(selectedIds as string[]).unwrap();
+
+      //show success message
+      console.log('Users deleted successfully');
+    } catch (error) {
+      console.error('Failed to delete users: ', error);
     }
+  };
+
+  //function to handle CSV export
+  const handleExportToCSV = useCallback((data: User[]) => {
+    //convert data to CSV format
+    const csv = Papa.unparse(data, {
+      header: true,
+    });
+
+    //create a blob from the CSV string
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+
+    //create a link element to trigger the download
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'users.csv'; //File name
+    link.click(); //trigger download
+
+    //clean up
+    URL.revokeObjectURL(link.href);
+  }, []);
+
+  if (loadingUsers) {
+    return <Loader />
+  }
   return (
     <div className='container mx-auto flex-col  justify-between items-center'>
-      {!UserError ? 
+      {!UserError ?
         <div>
-      {AllUsers && <DataTable columns={columns} data={AllUsers} /> }
-      </div>
-      :  
-      <div>An Error has been occured while fetching all the users</div>}
+          {AllUsers && <DataTable
+            columns={columns}
+            data={AllUsers}
+            searchColumn="email"
+            isLoading={loadingUsers}
+            error={UserError}
+            actionButton={{
+              label: "Delete Selected User(s)",
+              onClick: (selectedRows) => {
+                //handle delete action for users
+                handleDeleteUsers(selectedRows);
+              },
+            }}
+            exportButton={{
+              label: "Export to CSV",
+              onClick: (data) => {
+                //call the export function
+                handleExportToCSV(data);
+              },
+            }}
+          />
+          }
+        </div>
+        :
+        <div>An Error has been occured while fetching all the users</div>}
     </div>
   )
 }
