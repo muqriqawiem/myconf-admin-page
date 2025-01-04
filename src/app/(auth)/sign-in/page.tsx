@@ -13,30 +13,29 @@ import {
 } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { signInSchema } from '@/schemas/signInSchema';
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { Eye, EyeOff } from 'lucide-react';
 
 function SignInForm() {
   const router = useRouter();
-  const searchParams = useSearchParams(); // Extract query parameters
+  const [showPassword, setShowPassword] = useState(false);
+  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
-      identifier: '',
+      email: '',
       password: '',
     },
   });
 
-  const { toast } = useToast();
-
   const onSubmit = async (data: z.infer<typeof signInSchema>) => {
     const result = await signIn('credentials', {
       redirect: false,
-      identifier: data.identifier,
+      email: data.email,
       password: data.password,
     });
 
@@ -52,14 +51,14 @@ function SignInForm() {
       } else {
         toast({
           title: 'Error',
-          description: `${result.error}`,
+          description: 'An unexpected error occurred. Please try again later.',
           variant: 'destructive',
         });
       }
     }
 
     if (result?.url) {
-      router.replace('/conferences');
+      router.replace('/');
     }
   };
 
@@ -75,7 +74,7 @@ function SignInForm() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
-              name="identifier"
+              name="email"
               control={form.control}
               render={({ field }) => (
                 <FormItem>
@@ -84,6 +83,7 @@ function SignInForm() {
                     placeholder="Enter your email"
                     {...field}
                     className="border-gray-600 bg-gray-800 text-gray-300 placeholder-gray-500"
+                    aria-label="Email"
                   />
                   <FormMessage />
                 </FormItem>
@@ -95,12 +95,22 @@ function SignInForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-sm text-gray-400">Password</FormLabel>
-                  <Input
-                    type="password"
-                    placeholder="Enter your password"
-                    {...field}
-                    className="border-gray-600 bg-gray-800 text-gray-300 placeholder-gray-500"
-                  />
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Enter your password"
+                      {...field}
+                      className="border-gray-600 bg-gray-800 text-gray-300 placeholder-gray-500"
+                      aria-label="Password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                    >
+                      {showPassword ? <EyeOff className="h-5 w-5 text-gray-400" /> : <Eye className="h-5 w-5 text-gray-400" />}
+                    </button>
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
@@ -113,14 +123,6 @@ function SignInForm() {
             </Button>
           </form>
         </Form>
-        {/* <div className="text-center mt-4">
-          <p className="text-sm text-gray-500">
-            Don&apos;t have an account? &nbsp;
-            <Link href="/sign-up" className="text-indigo-500 hover:text-indigo-700 font-medium">
-              Sign up now
-            </Link>
-          </p>
-        </div> */}
       </div>
     </div>
   );
