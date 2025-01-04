@@ -12,17 +12,22 @@ export const authOptions: NextAuthOptions = {
             },
             async authorize(credentials: any): Promise<any> {
                 try {
-                    if (credentials.identifier === process.env.NEXT_AUTH_EMAIL && credentials.password === process.env.NEXT_AUTH_PASSWORD) {
+                    // Check if credentials are provided
+                    if (!credentials?.email || !credentials?.password) {
+                        throw new Error("Email and password are required");
+                    }
+
+                    // Validate credentials
+                    if (
+                        credentials.email === process.env.NEXT_AUTH_EMAIL &&
+                        credentials.password === process.env.NEXT_AUTH_PASSWORD
+                    ) {
                         return {
-                            email: credentials.identifier,
+                            email: credentials.email,
                             fullname: "Admin" // Add a fullname if needed
                         };
-                    }
-                    if (credentials.password !== process.env.NEXT_AUTH_PASSWORD) {
-                        throw new Error("Incorrect Password for admin access");
-                    }
-                    if (credentials.identifier !== process.env.NEXT_AUTH_EMAIL) {
-                        throw new Error("Incorrect email for admin access");
+                    } else {
+                        throw new Error("Invalid email or password");
                     }
                 } catch (error: any) {
                     throw new Error(error.message || "Login failed");
@@ -47,10 +52,10 @@ export const authOptions: NextAuthOptions = {
         }
     },
     pages: {
-        signIn: '/sign-in',
+        signIn: '/sign-in', // Ensure this route exists in your app
     },
     session: {
         strategy: "jwt"
     },
-    secret: process.env.NEXTAUTH_SECRET
+    secret: process.env.NEXTAUTH_SECRET // Ensure this is set in your environment variables
 };

@@ -1,9 +1,8 @@
-
 'use client';
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react'; // Import signOut
 import { Button } from './ui/button';
 import { User } from 'next-auth';
 import { useRouter } from 'next/navigation';
@@ -15,6 +14,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 function Navbar() {
   const { data: session } = useSession();
   const [open, setOpen] = useState(false);
+  const router = useRouter();
 
   // Framer motion variants for opening and closing the menu
   const menuVariants = {
@@ -46,6 +46,11 @@ function Navbar() {
     open: { rotate: 180 }, // Smooth icon rotation when menu is open
   };
 
+  // Handle logout
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: '/sign-in' }); // Redirect to sign-in page after logout
+  };
+
   return (
     <nav className="p-2 backdrop-blur-3xl shadow-background sticky top-0 z-50 ">
       {/* Mobile Navigation */}
@@ -72,20 +77,27 @@ function Navbar() {
         </div>
 
         <div>
-          {/* {session ? "hello" : (
+          {session ? (
+            <Button
+              onClick={handleLogout}
+              className="p-2 h-8 rounded-sm bg-red-600 hover:bg-red-700 text-white"
+            >
+              Logout
+            </Button>
+          ) : (
             <div className="flex gap-4 items-center">
               <Link href="/sign-in">
                 <Button className="p-2 h-8 rounded-sm" variant={'ghost'}>
                   Login
                 </Button>
               </Link>
-              <Link href="/sign-up">
+              {/* <Link href="/sign-up">
                 <Button className="p-2 h-8 rounded-sm" variant={'default'}>
                   Sign up
                 </Button>
-              </Link>
+              </Link> */}
             </div>
-          )} */}
+          )}
         </div>
       </div>
 
@@ -111,12 +123,14 @@ function Navbar() {
               <Link href="/users" className="hover:font-bold" onClick={() => setOpen(false)}>
                 Users
               </Link>
-              {/* <Link href="/smart-sub" className="hover:font-bold" onClick={() => setOpen(false)}>
-                SmartSub
-              </Link> */}
-              {/* <Link href="/pricing" className="hover:font-bold" onClick={() => setOpen(false)}>
-                Pricing
-              </Link> */}
+              {session && (
+                <Button
+                  onClick={handleLogout}
+                  className="p-2 h-8 rounded-sm bg-red-600 hover:bg-red-700 text-white"
+                >
+                  Logout
+                </Button>
+              )}
             </motion.div>
           </motion.div>
         )}
@@ -129,11 +143,32 @@ function Navbar() {
         </Link>
         <div className="flex flex-col lg:flex-row gap-6 text-center">
           <Link href="/conferences" className="hover:font-bold" onClick={() => setOpen(false)}>
-                Conferences
-              </Link>
+            Conferences
+          </Link>
           <Link href="/users" className="hover:font-bold">
             Users
           </Link>
+          {session ? (
+            <Button
+              onClick={handleLogout}
+              className="p-2 h-8 rounded-sm bg-red-600 hover:bg-red-700 text-white"
+            >
+              Logout
+            </Button>
+          ) : (
+            <div className="flex gap-4 items-center">
+              <Link href="/sign-in">
+                <Button className="p-2 h-8 rounded-sm" variant={'ghost'}>
+                  Login
+                </Button>
+              </Link>
+              {/* <Link href="/sign-up">
+                <Button className="p-2 h-8 rounded-sm" variant={'default'}>
+                  Sign up
+                </Button>
+              </Link> */}
+            </div>
+          )}
         </div>
       </div>
     </nav>
