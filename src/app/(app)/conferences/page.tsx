@@ -1,23 +1,73 @@
-"use client"
-import Loader from '@/components/Loader'
-import { useGetAllConferencesQuery } from '@/store/features/ConferenceData'
-import React, { useCallback } from 'react'
-import { ColumnDef } from "@tanstack/react-table"
-import { DataTable } from '../../../components/DataTable'
-import { Button } from '@/components/ui/button'
-import { ArrowUpDown } from 'lucide-react'
-import { Checkbox } from "@/components/ui/checkbox"
-import { IConference } from '@/model/ConferenceSchema'
-import { usePathname, useRouter } from 'next/navigation'
-import { Badge } from '@/components/ui/badge'
-import Papa from 'papaparse'
+"use client";
+import Loader from '@/components/Loader';
+import { useGetAllConferencesQuery } from '@/store/features/ConferenceData';
+import React, { useCallback, useState } from 'react';
+import { ColumnDef } from "@tanstack/react-table";
+import { DataTable } from '../../../components/DataTable';
+import { Button } from '@/components/ui/button';
+import { ArrowUpDown } from 'lucide-react';
+import { Checkbox } from "@/components/ui/checkbox";
+import { IConference } from '@/model/ConferenceSchema';
+import { usePathname, useRouter } from 'next/navigation';
+import { Badge } from '@/components/ui/badge';
+import Papa from 'papaparse';
 import { useDeleteConferencesMutation } from '@/store/features/ConferenceData';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from '@/hooks/use-toast'; // Import the toast function
 
 const Page = () => {
-  const router = useRouter()
-  const pathname = usePathname()
+  const router = useRouter();
+  const pathname = usePathname();
+  const queryClient = useQueryClient();
+  const [rowSelection, setRowSelection] = useState({});
+
+  const { data: AllConferences, error: ConferencesError, isLoading: loadingConferences } = useGetAllConferencesQuery();
+
+  const [deleteConferences] = useDeleteConferencesMutation();
+
+  const handleDeleteConferences = async (selectedRows: IConference[]) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete the selected conferences?");
+    if (!confirmDelete) return;
+
+    try {
+      const selectedIds = selectedRows.map(row => row._id);
+      await deleteConferences(selectedIds as string[]).unwrap();
+      queryClient.invalidateQueries({ queryKey: ['conferences'] });
+
+      // Show success toast
+      toast({
+        title: "Success",
+        description: "Conferences deleted successfully.",
+        variant: "default",
+      });
+    } catch (error) {
+      console.error('Failed to delete conferences: ', error);
+
+      // Show error toast
+      toast({
+        title: "Error",
+        description: "Failed to delete conferences.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Function to handle CSV export
+  const handleExportToCSV = useCallback((data: IConference[]) => {
+    const csv = Papa.unparse(data, {
+      header: true,
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'conferences.csv';
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }, []);
 
   const columns: ColumnDef<IConference>[] = [
+    // Column definitions...
     {
       id: "select",
       header: ({ table }) => (
@@ -103,49 +153,10 @@ const Page = () => {
         <Button variant={'outline'} onClick={() => router.push(`${pathname}/${info.getValue()}`)}>Open</Button>
       )
     },
-  ]
-
-  const { data: AllConferences, error: ConferencesError, isLoading: loadingConferences } = useGetAllConferencesQuery();
-
-  const [deleteConferences] = useDeleteConferencesMutation();
-
-  const handleDeleteConferences = async (selectedRows: IConference[]) => {
-    try {
-      //extract IDs of selected conferences
-      const selectedIds = selectedRows.map(row => row._id);
-
-      //call the delete mutation
-      await deleteConferences(selectedIds as string[]).unwrap();
-
-      //show success message
-      console.log('Conferences deleted successfully');
-    } catch (error) {
-      console.error('Failed to delete conferences: ', error);
-    }
-  };
-
-  //function to handle CSV export
-  const handleExportToCSV = useCallback((data: IConference[]) => {
-    //convert data to CSV format
-    const csv = Papa.unparse(data, {
-      header: true,
-    });
-
-    //create a blob from the CSV string
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;'});
-
-    //create a link element to trigger the download
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'conferences.csv'; //File name
-    link.click(); //trigger download
-
-    //clean up
-    URL.revokeObjectURL(link.href);
-  }, []);
+  ];
 
   if (loadingConferences) {
-    return <Loader />
+    return <Loader />;
   }
 
   return (
@@ -162,17 +173,17 @@ const Page = () => {
               actionButton={{
                 label: "Delete Selected Conference(s)",
                 onClick: (selectedRows) => {
-                  //handle delete action for conferences
                   handleDeleteConferences(selectedRows);
                 },
+                disabled: Object.keys(rowSelection).length === 0, // Disable button if no rows are selected
               }}
               exportButton={{
                 label: "Export to CSV",
                 onClick: (data) => {
-                  //call the export function
                   handleExportToCSV(data);
                 },
               }}
+              onRowSelectionChange={setRowSelection} //pass the setRowSelection
             />
           )}
         </div>
@@ -180,7 +191,7 @@ const Page = () => {
         <div>An error occurred while fetching all the conferences.</div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default Page
+export default Page;

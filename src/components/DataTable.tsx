@@ -31,6 +31,7 @@ interface DataTableProps<TData, TValue> {
   actionButton?: {
     label: string;
     onClick: (selectedRows: TData[]) => void;
+    disabled?: boolean;
   };
   exportButton?: {
     label: string;
@@ -38,6 +39,7 @@ interface DataTableProps<TData, TValue> {
   };
   isLoading?: boolean;
   error?: string;
+  onRowSelectionChange?: (rowSelection: Record<string, boolean>) => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -48,6 +50,7 @@ export function DataTable<TData, TValue>({
   exportButton,
   isLoading,
   error,
+  onRowSelectionChange,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -62,7 +65,14 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
-    onRowSelectionChange: setRowSelection,
+    onRowSelectionChange: (updater) => {
+      //update the internal row selection state
+      setRowSelection(updater);
+      //call the onRowSelectionChange prop if provided
+      if (onRowSelectionChange) {
+        onRowSelectionChange(typeof updater === "function" ? updater(rowSelection) : updater);
+      }
+    },
     state: {
       sorting,
       columnFilters,
@@ -100,7 +110,7 @@ export function DataTable<TData, TValue>({
         />
         <div className="flex items-center space-x-2">
         {actionButton && (
-          <Button onClick={handleAction}>{actionButton.label}</Button>
+          <Button onClick={handleAction} disabled={actionButton.disabled}>{actionButton.label}</Button>
         )}
         {exportButton && (
           <Button onClick={handleExport}>{exportButton.label}</Button>
