@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import {
@@ -20,21 +18,23 @@ import { IConference } from "@/model/ConferenceSchema";
 import { useGetConferenceByConferenceIDQuery } from "@/store/features/ConferenceData";
 import Loader from "@/components/Loader";
 import { CommentDialog } from "./comment";
+import { useQueryClient } from "@tanstack/react-query";
 
 
 const ConferencePage = () => {
   const params = useParams();
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(true);
   // const [conferenceDetails, setConferenceDetails] = useState<IConference | null>(null);
 
   const baseUrl = `${window.location.protocol}//${window.location.host}`;
 
-    const { data:conferenceDetails, error, isLoading } = useGetConferenceByConferenceIDQuery(params.confAcronym as string);
+  const { data: conferenceDetails, error, isLoading } = useGetConferenceByConferenceIDQuery(params.confAcronym as string);
 
-    console.log(conferenceDetails)  
+  console.log(conferenceDetails)
 
   if (isLoading) {
-    return <Loader/>
+    return <Loader />
   }
 
   if (!conferenceDetails) {
@@ -65,13 +65,22 @@ const ConferencePage = () => {
     conferenceStatusComment,
     conferenceSubmissionsDeadlineDate,
   } = conferenceDetails;
+
   const validStatus = conferenceStatus === "accepted" || conferenceStatus === "review" || conferenceStatus === "rejected" ? conferenceStatus : undefined;
+
   return (
     <div className="container mx-auto p-6 bg-white rounded-lg">
       <div className="shadow p-4">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold">{conferenceTitle}</h1>
-          <CommentDialog ConfAcronym={params.confAcronym as string} confStatus={conferenceStatus} />
+          <CommentDialog
+            ConfAcronym={params.confAcronym as string}
+            confStatus={conferenceStatus}
+            onStatusUpdate={() => {
+              //invalidate the conference query to refetch data
+              queryClient.invalidateQueries({ queryKey: ['conferences'] });
+            }}
+          />
         </div>
         <Table className="min-w-full">
           <TableBody>
@@ -86,18 +95,18 @@ const ConferencePage = () => {
             </TableRow>
             <TableRow>
               <TableHead>Email</TableHead>
-              <TableCell className="font-medium">{conferenceEmail}</TableCell> 
+              <TableCell className="font-medium">{conferenceEmail}</TableCell>
             </TableRow>
             <TableRow>
               <TableHead>Conference Organizer webpage</TableHead>
               <Link href={conferenceOrganizerWebPage} target="_blank">
-              <TableCell className="font-medium">{conferenceOrganizerWebPage}</TableCell>
+                <TableCell className="font-medium">{conferenceOrganizerWebPage}</TableCell>
               </Link>
             </TableRow>
             <TableRow>
               <TableHead>Conference Website</TableHead>
               <Link href={conferenceWebpage} target="_blank">
-              <TableCell className="font-medium">{conferenceWebpage}</TableCell>
+                <TableCell className="font-medium">{conferenceWebpage}</TableCell>
               </Link>
             </TableRow>
             <TableRow>
@@ -156,7 +165,7 @@ const ConferencePage = () => {
               <TableHead>Area Notes</TableHead>
               <TableCell className="font-medium">{conferenceAreaNotes || "No Area Notes are present for this conference"}</TableCell>
             </TableRow>
-            
+
             <TableRow>
               <TableHead>Additional Information</TableHead>
               <TableCell className="font-medium">{conferenceAnyOtherInformation}</TableCell>
