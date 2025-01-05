@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "@/context/AuthProvider";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "@/components/ui/toaster"; // Ensure this is the correct import
 import StoreProvider from "./StoreProvider";
-import Head from "next/head";
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -19,18 +19,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <Head>
-      <link rel="shortcut icon" href="/favicon.png" />
-    </Head>
-      <AuthProvider>
+      {/* Use the metadata object for favicon and other head elements */}
+      <head>
+        <link rel="shortcut icon" href="/favicon.png" />
+      </head>
       <body className={inter.className}>
-      <StoreProvider>
-        {children}
-      <Toaster />
-      </StoreProvider>
-        </body>
-      </AuthProvider>
+        {/* Wrap everything with AuthProvider */}
+        <AuthProvider>
+          <StoreProvider>
+              {children}
+              <Toaster /> {/* Render the Toaster component */}
+            </StoreProvider>
+        </AuthProvider>
+      </body>
     </html>
   );
 }
-  
