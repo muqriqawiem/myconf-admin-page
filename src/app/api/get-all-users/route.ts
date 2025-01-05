@@ -1,4 +1,3 @@
-
 import dbConnect from "@/lib/dbConnect";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/options";
@@ -15,38 +14,54 @@ export async function GET(request: Request) {
                 success: false,
                 message: "Not Authenticated",
             }),
-            { status: 401 }
+            {
+                status: 401,
+                headers: { 'Cache-Control': 'no-store, max-age=0' }, // Disable caching
+            }
         );
     }
+
     try {
+        const getUserDetails = await UserModel.find();
 
-        const getUserDetails=await UserModel.find();
-
-        if(!getUserDetails){
+        if (!getUserDetails) {
             return new Response(
-            JSON.stringify({
-                success: false,
-                message: "Error occurred while fetching All User Details",
-            }),
-            { status: 500 });
+                JSON.stringify({
+                    success: false,
+                    message: "Error occurred while fetching all user details",
+                }),
+                {
+                    status: 500,
+                    headers: { 'Cache-Control': 'no-store, max-age=0' }, // Disable caching
+                }
+            );
         }
 
         return new Response(
             JSON.stringify({
                 success: true,
                 message: "Users found for the conference",
-                data:getUserDetails,
+                data: getUserDetails,
             }),
-            { status: 200 }
+            {
+                status: 200,
+                headers: {
+                    'Cache-Control': 'no-store, max-age=0', // Disable caching
+                    'Content-Type': 'application/json',
+                },
+            }
         );
     } catch (error) {
-        console.log("An unexpected error occurred: ", error);
+        console.error("An unexpected error occurred:", error);
         return new Response(
             JSON.stringify({
                 success: false,
-                message: "Error occurred while fetching Users",
+                message: "Error occurred while fetching users",
             }),
-            { status: 500 }
+            {
+                status: 500,
+                headers: { 'Cache-Control': 'no-store, max-age=0' }, // Disable caching
+            }
         );
     }
 }
