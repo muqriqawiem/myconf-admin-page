@@ -17,7 +17,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useParams } from 'next/navigation';
-import { toast } from '@/hooks/use-toast'; // Import the toast function
 
 // Define the validation schema
 const paperSubmissionSchema = z.object({
@@ -27,14 +26,9 @@ const paperSubmissionSchema = z.object({
 
 type FormValues = z.infer<typeof paperSubmissionSchema>;
 
-interface CommentDialogProps {
-  ConfAcronym: string;
-  confStatus: "accepted" | "review" | "rejected" |"submitted"| undefined;
-  onStatusUpdate: () => void;
-}
-
 // onfAcronym={params.confAcronym} confStatus={conferenceStatus}
-export function CommentDialog({ ConfAcronym, confStatus, onStatusUpdate}: CommentDialogProps) {
+export function CommentDialog({ ConfAcronym, confStatus}: { ConfAcronym: string; confStatus: "accepted" | "review" | "rejected" |"submitted"| undefined }) {
+
   const form = useForm<z.infer<typeof paperSubmissionSchema>>({
     resolver: zodResolver(paperSubmissionSchema),
     defaultValues: {
@@ -53,26 +47,9 @@ export function CommentDialog({ ConfAcronym, confStatus, onStatusUpdate}: Commen
 
       // Handle success (e.g., close dialog, show success message)
       console.log('Success:', result.data);
-
-      //show success toast
-      toast({
-        title: "Success",
-        description: "Comment added successfully.",
-        variant: "default",
-      });
-
-      //call the onstatusUpdate function to invalidate and refetch data
-      onStatusUpdate();
     } catch (error) {
-      //Handle error 
-      console.error('Error: ', error);
-
-      //show error toast
-      toast({
-        title: "Error",
-        description: "Failed to update conference status.",
-        variant: "destructive",
-      });
+      // Handle error (e.g., show error message)
+      console.error('Error:', error);
     }
   };
 
