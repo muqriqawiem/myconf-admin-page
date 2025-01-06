@@ -58,7 +58,7 @@ const Page = () => {
 
   // Function to handle CSV export
   const handleExportToCSV = useCallback((data: IConference[]) => {
-    if (!data || data.length === 0){
+    if (!data || data.length === 0) {
       toast({
         title: 'Error',
         description: 'No data to export',
@@ -66,7 +66,7 @@ const Page = () => {
       });
       return;
     }
-    
+
     const csv = Papa.unparse(data, {
       header: true,
     });
@@ -157,6 +157,21 @@ const Page = () => {
       cell: info => (
         info.getValue() ? <Badge className='text-md' variant={'premium'}>Premium</Badge> : <Badge className='text-md' variant={"default"}>No</Badge>
       )
+    },
+    {
+      accessorFn: (row) => row.conferenceLifecycleStatus,
+      header: "Lifecycle Status",
+      cell: (info) => {
+        const value = info.getValue();
+        switch (value) {
+          case "active":
+            return <Badge variant="active" className='text-md'>Active</Badge>;
+          case "ended":
+            return <Badge variant="ended" className='text-md'>Ended</Badge>;
+          default:
+            return <Badge variant="active" className='text-md'>Active</Badge>;
+        }
+      }
     },
     {
       header: "Information",
