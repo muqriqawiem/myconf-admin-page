@@ -21,6 +21,7 @@ import { useGetConferenceByConferenceIDQuery } from "@/store/features/Conference
 import Loader from "@/components/Loader";
 import { CommentDialog } from "./comment";
 
+export const dynamic = 'force-dynamic';
 
 const ConferencePage = () => {
   const params = useParams();
