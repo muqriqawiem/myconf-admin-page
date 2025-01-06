@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
+export const dynamic = 'force-dynamic';
+
 const Page = () => {
   const [statistics, setStatistics] = useState({
     totalConferences: 0,
@@ -182,7 +184,7 @@ const Page = () => {
         </Card>
 
         {/* System Settings */}
-        <Card className="hover:shadow-lg transition-shadow duration-200">
+        {/* <Card className="hover:shadow-lg transition-shadow duration-200">
           <CardHeader>
             <CardTitle className="text-xl font-semibold">System Settings</CardTitle>
           </CardHeader>
@@ -196,7 +198,7 @@ const Page = () => {
               </Button>
             </Link>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
 
       {/* Footer Section */}

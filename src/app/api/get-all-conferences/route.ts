@@ -1,6 +1,8 @@
 import dbConnect from "@/lib/dbConnect";
 import ConferenceModel from "@/model/ConferenceSchema";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
     await dbConnect();
 

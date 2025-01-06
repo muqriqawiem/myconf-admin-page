@@ -12,6 +12,8 @@ import Papa from 'papaparse';
 import { useDeleteUsersMutation } from '@/store/features/UserData';
 import { toast } from '@/hooks/use-toast';
 
+export const dynamic = 'force-dynamic';
+
 const columns: ColumnDef<User>[] = [
   {
     id: "select",
@@ -74,7 +76,9 @@ const columns: ColumnDef<User>[] = [
 const Page = () => {
   const [rowSelection, setRowSelection] = useState({}); // Track row selection state
 
-  const { data: AllUsers, error: UserError, isLoading: loadingUsers } = useGetAllUsersQuery();
+  const { data: AllUsers, error: UserError, isLoading: loadingUsers } = useGetAllUsersQuery(undefined, {
+    pollingInterval: 5000,
+  });
 
   const [deleteUsers] = useDeleteUsersMutation();
 

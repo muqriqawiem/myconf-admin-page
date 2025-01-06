@@ -15,13 +15,17 @@ import { useDeleteConferencesMutation } from '@/store/features/ConferenceData';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast'; // Import the toast function
 
+export const dynamic = 'force-dynamic';
+
 const Page = () => {
   const router = useRouter();
   const pathname = usePathname();
   const queryClient = useQueryClient();
   const [rowSelection, setRowSelection] = useState({});
 
-  const { data: AllConferences, error: ConferencesError, isLoading: loadingConferences } = useGetAllConferencesQuery();
+  const { data: AllConferences, error: ConferencesError, isLoading: loadingConferences } = useGetAllConferencesQuery(undefined, {
+    pollingInterval: 5000,
+  });
 
   const [deleteConferences] = useDeleteConferencesMutation();
 
@@ -54,6 +58,15 @@ const Page = () => {
 
   // Function to handle CSV export
   const handleExportToCSV = useCallback((data: IConference[]) => {
+    if (!data || data.length === 0){
+      toast({
+        title: 'Error',
+        description: 'No data to export',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
     const csv = Papa.unparse(data, {
       header: true,
     });

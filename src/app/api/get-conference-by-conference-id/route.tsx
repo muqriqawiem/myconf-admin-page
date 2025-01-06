@@ -4,6 +4,8 @@ import { authOptions } from "../auth/[...nextauth]/options";
 import ConferenceModel from "@/model/ConferenceSchema";
 import UserModel from "@/model/User";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
     await dbConnect();
 
