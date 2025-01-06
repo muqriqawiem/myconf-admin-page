@@ -11,6 +11,7 @@ import { User } from '@/model/User';
 import Papa from 'papaparse';
 import { useDeleteUsersMutation } from '@/store/features/UserData';
 import { toast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
 
 export const dynamic = 'force-dynamic';
 
@@ -70,6 +71,14 @@ const columns: ColumnDef<User>[] = [
   {
     accessorKey: "isVerified",
     header: "Verified User",
+    cell: (info) => {
+      const isVerified = info.getValue() as boolean; // Get the value of isVerified
+      return (
+        <Badge variant={isVerified ? "verified" : "unverified"} className='text-md'>
+          {isVerified ? "Verified" : "Unverified"}
+        </Badge>
+      );
+    },
   },
 ];
 
